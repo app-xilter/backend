@@ -40,24 +40,37 @@ func main() {
 			}
 		}()
 
-		var t model.Tweets
-		err := json.NewDecoder(r.Body).Decode(&t)
+		var req model.Request
+		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
 			http.Error(w, "Invalid JSON", http.StatusBadRequest)
 			return
 		}
 
-		err = durable.ValidateStruct(t)
+		err = durable.ValidateStruct(req)
 		if err != nil {
 			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		var responseModel model.Response
+		for _, tweet := range req.Tweets {
+			responseModel.Results = append(responseModel.Results, model.Result{
+				Link:     tweet.Link,
+				Category: 1,
+			})
+		}
+
+		res, err := json.Marshal(responseModel)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
-		w.Write([]byte(`{"message": "ok"}`))
-
+		w.Write(res)
 	})
 
 	fmt.Println("Server is starting on port 8080...")

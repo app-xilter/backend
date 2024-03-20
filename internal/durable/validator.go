@@ -1,13 +1,12 @@
 package durable
 
 import (
-	"backend/internal/model"
 	"github.com/go-playground/validator/v10"
 )
 
-func ValidateStruct(t model.Tweets) error {
+func ValidateStruct(s interface{}) error {
 	validate := validator.New()
-	if err := validate.Struct(t); err != nil {
+	if err := validate.Struct(s); err != nil {
 		return err
 	}
 
