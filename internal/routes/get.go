@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func GetTags(mux *http.ServeMux) {
+func Get(mux *http.ServeMux) {
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		tags := []model.SystemTag{
 			{Id: 1, Name: "tag1"},

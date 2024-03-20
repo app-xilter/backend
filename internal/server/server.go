@@ -9,7 +9,7 @@ import (
 
 func SetupRoutes(mux *http.ServeMux) {
 	routes.Post(mux)
-	routes.GetTags(mux)
+	routes.Get(mux)
 }
 
 func SetupMiddleware(handler http.Handler) http.Handler {
