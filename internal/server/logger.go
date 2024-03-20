@@ -19,6 +19,6 @@ func LoggerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		srw := &statusResponseWriter{ResponseWriter: w}
 		next.ServeHTTP(srw, r)
-		fmt.Printf("%d %s %s (%s)\n", srw.status, r.Method, r.URL, r.RemoteAddr)
+		fmt.Printf("%s		%s	%d	%s\n", r.Method, r.URL, srw.status, r.RemoteAddr)
 	})
 }

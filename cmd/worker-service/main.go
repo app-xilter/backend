@@ -3,7 +3,6 @@ package main
 import (
 	"backend/internal/durable"
 	"backend/internal/server"
-	"flag"
 	"github.com/joho/godotenv"
 	"log"
 	"net/http"
@@ -11,8 +10,6 @@ import (
 )
 
 func init() {
-	flag.Parse()
-
 	// setup logger
 	durable.SetupLogger()
 
