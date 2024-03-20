@@ -9,6 +9,7 @@ import (
 
 func SetupRoutes(mux *http.ServeMux) {
 	routes.Post(mux)
+	routes.GetTags(mux)
 }
 
 func StartServer(mux *http.ServeMux, port string) {
