@@ -2,10 +2,8 @@ package main
 
 import (
 	"backend/internal/durable"
-	"backend/internal/model"
-	"encoding/json"
+	"backend/internal/server"
 	"flag"
-	"fmt"
 	"github.com/joho/godotenv"
 	"log"
 	"net/http"
@@ -30,49 +28,8 @@ func init() {
 }
 
 func main() {
-	http.HandleFunc("POST /", func(w http.ResponseWriter, r *http.Request) {
-		durable.EnableCors(&w)
+	mux := http.NewServeMux()
+	server.SetupRoutes(mux)
 
-		defer func() {
-			if err := recover(); err != nil {
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-				log.Printf("Panic: %v", err)
-			}
-		}()
-
-		var req model.Request
-		err := json.NewDecoder(r.Body).Decode(&req)
-		if err != nil {
-			http.Error(w, "Invalid JSON", http.StatusBadRequest)
-			return
-		}
-
-		err = durable.ValidateStruct(req)
-		if err != nil {
-			http.Error(w, err.Error(), 400)
-			return
-		}
-
-		var responseModel model.Response
-		for _, tweet := range req.Tweets {
-			responseModel.Results = append(responseModel.Results, model.Result{
-				Link:     tweet.Link,
-				Category: 1,
-			})
-		}
-
-		res, err := json.Marshal(responseModel)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-
-		w.Write(res)
-	})
-
-	fmt.Println("Server is starting on port 8080...")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	server.StartServer(mux, "8080")
 }
