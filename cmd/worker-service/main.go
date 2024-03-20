@@ -31,7 +31,7 @@ func init() {
 
 func main() {
 	http.HandleFunc("POST /", func(w http.ResponseWriter, r *http.Request) {
-		enableCors(&w)
+		durable.EnableCors(&w)
 
 		defer func() {
 			if err := recover(); err != nil {
@@ -75,8 +75,4 @@ func main() {
 
 	fmt.Println("Server is starting on port 8080...")
 	log.Fatal(http.ListenAndServe(":8080", nil))
-}
-
-func enableCors(w *http.ResponseWriter) {
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }
