@@ -10,8 +10,6 @@ import (
 
 func Post(mux *http.ServeMux) {
 	mux.HandleFunc("POST /", func(w http.ResponseWriter, r *http.Request) {
-		durable.EnableCors(&w)
-
 		defer func() {
 			if err := recover(); err != nil {
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)

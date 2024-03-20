@@ -31,7 +31,6 @@ func main() {
 	mux := http.NewServeMux()
 	server.SetupRoutes(mux)
 
-	loggingMux := server.LoggerMiddleware(mux)
-
-	server.StartServer(loggingMux, "8080")
+	middlewareMux := server.SetupMiddleware(mux)
+	server.StartServer(middlewareMux, "8080")
 }
