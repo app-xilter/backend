@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"backend/internal/durable"
 	"backend/internal/model"
 	"encoding/json"
 	"log"
@@ -9,12 +10,14 @@ import (
 
 func Get(mux *http.ServeMux) {
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		tags := []model.SystemTag{
-			{Id: 1, Name: "tag1"},
-			{Id: 2, Name: "tag2"},
+		tagsList := model.SystemTagResponse{}
+		if err := durable.Connection().Table("tags").Find(&tagsList.Tags).Error; err != nil {
+			http.Error(w, "Database error: getting tags", http.StatusInternalServerError)
+			log.Println(err)
+			return
 		}
 
-		res, err := json.Marshal(model.SystemTagResponse{Tags: tags})
+		res, err := json.Marshal(tagsList)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

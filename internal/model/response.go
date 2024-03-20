@@ -1,8 +1,9 @@
 package model
 
 type Result struct {
-	Link     string `json:"link"`
-	Category int    `json:"category"`
+	Link    string `json:"link"`
+	Tag     int    `json:"tag"`
+	TagName string `json:"tag_name"`
 }
 
 type Response struct {

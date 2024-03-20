@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 )
 
 func Post(mux *http.ServeMux) {
@@ -32,9 +33,28 @@ func Post(mux *http.ServeMux) {
 
 		var responseModel model.Response
 		for _, tweet := range req.Tweets {
+			err := durable.ValidateUrl(tweet.Link)
+			if err != nil {
+				continue
+			}
+
+			createTweet := model.Tweets{
+				Link:      tweet.Link,
+				TagId:     1,
+				CreatedAt: time.Now(),
+			}
+
+			result := durable.Connection().Where(model.Tweets{Link: tweet.Link}).FirstOrCreate(&createTweet)
+
+			if result.Error != nil {
+				log.Printf("Error handling tweet: %v", result.Error)
+				continue
+			}
+
 			responseModel.Results = append(responseModel.Results, model.Result{
-				Link:     tweet.Link,
-				Category: 1,
+				Link:    createTweet.Link,
+				Tag:     createTweet.TagId,
+				TagName: "football",
 			})
 		}
 

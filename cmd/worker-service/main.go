@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend/internal/durable"
+	"backend/internal/model"
 	"backend/internal/server"
 	"github.com/joho/godotenv"
 	"log"
@@ -22,6 +23,13 @@ func init() {
 	if err := durable.ConnectDB(os.Getenv("DB_DSN")); err != nil {
 		log.Fatal("Error connecting to database")
 	}
+
+	// migrate database
+	if err := durable.Connection().AutoMigrate(
+		&model.Tags{},
+		&model.Tweets{}); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func main() {
@@ -29,5 +37,5 @@ func main() {
 	server.SetupRoutes(mux)
 
 	middlewareMux := server.SetupMiddleware(mux)
-	server.StartServer(middlewareMux, "8080")
+	server.StartServer(middlewareMux, os.Getenv("SERVER_PORT"))
 }
