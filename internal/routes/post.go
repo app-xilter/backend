@@ -69,14 +69,14 @@ func Post(mux *http.ServeMux) {
 
 		var responseModel model.Response
 		for key, value := range contentData {
+			value = int(value.(float64))
+			if value.(int) == 0 {
+				continue
+			}
+
 			index, err := strconv.Atoi(key)
 			if err != nil {
 				log.Printf("Error converting key to integer: %v", err)
-				continue
-			}
-			value = int(value.(float64))
-
-			if value.(int) == 0 {
 				continue
 			}
 
