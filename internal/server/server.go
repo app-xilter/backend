@@ -9,7 +9,7 @@ import (
 
 func SetupRoutes(mux *http.ServeMux) {
 	routes.Post(mux)
-	routes.Get(mux)
+	//routes.Get(mux)
 	routes.Health(mux)
 }
 
