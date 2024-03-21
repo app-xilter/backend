@@ -5,5 +5,5 @@ type Result struct {
 }
 
 type Response struct {
-	Results []Result `json:"results"`
+	Results []Result `json:"filteredTweets"`
 }
