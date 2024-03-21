@@ -52,9 +52,8 @@ func Post(mux *http.ServeMux) {
 			}
 
 			responseModel.Results = append(responseModel.Results, model.Result{
-				Link:    createTweet.Link,
-				Tag:     createTweet.TagId,
-				TagName: "football",
+				Link:     createTweet.Link,
+				Filtered: true,
 			})
 		}
 
