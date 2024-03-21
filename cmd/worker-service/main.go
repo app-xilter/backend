@@ -18,18 +18,18 @@ func init() {
 		log.Fatal("Error loading .env file")
 	}
 
-	/*
-		// connect to database
-		if err := durable.ConnectDB(os.Getenv("DB_DSN")); err != nil {
-			log.Fatal("Error connecting to database")
-		}
+	/* test
+	// connect to database
+	if err := durable.ConnectDB(os.Getenv("DB_DSN")); err != nil {
+		log.Fatal("Error connecting to database")
+	}
 
-		// migrate database
-		if err := durable.Connection().AutoMigrate(
-			&model.Tags{},
-			&model.Tweets{}); err != nil {
-			log.Fatal(err)
-		}*/
+	// migrate database
+	if err := durable.Connection().AutoMigrate(
+		&model.Tags{},
+		&model.Tweets{}); err != nil {
+		log.Fatal(err)
+	}*/
 
 }
 
