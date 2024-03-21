@@ -13,4 +13,6 @@ WORKDIR /app
 COPY --from=builder --chown=nonroot:nonroot /app/worker-service .
 COPY --from=builder --chown=nonroot:nonroot /app/.env .
 
+EXPOSE 8080
+
 ENTRYPOINT ["./worker-service"]
