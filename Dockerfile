@@ -1,7 +1,7 @@
 FROM golang:1.22-alpine as builder
 
 WORKDIR /app
-COPY cmd/worker-service .
+COPY . .
 
 RUN go mod tidy && go mod verify
 RUN CGO_ENABLED=0 go build -o worker-service cmd/worker-service/main.go
