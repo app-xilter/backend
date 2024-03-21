@@ -1,6 +1,7 @@
 package durable
 
 import (
+	_ "github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/postgres"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -13,6 +14,7 @@ func ConnectDB(c string) error {
 	db, err = gorm.Open(postgres.New(postgres.Config{
 		DSN:                  c,
 		PreferSimpleProtocol: true,
+		DriverName:           "cloudsqlpostgres",
 	}), &gorm.Config{SkipDefaultTransaction: false})
 
 	if err != nil {
