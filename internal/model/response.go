@@ -1,8 +1,7 @@
 package model
 
 type Result struct {
-	Link     string `json:"link"`
-	Filtered bool   `json:"filtered"`
+	Link string `json:"link"`
 }
 
 type Response struct {
