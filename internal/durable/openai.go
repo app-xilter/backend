@@ -105,7 +105,7 @@ func CreateCategoriesPrompt(c []model.Tag) (string, error) {
 
 	for _, tag := range c {
 		length++
-		categoriesPrompt += fmt.Sprintf("%s(%d),", tag.Text, tag.Id)
+		categoriesPrompt += fmt.Sprintf("%s(%d),", tag.Name, tag.Id)
 	}
 
 	categoriesPrompt = categoriesPrompt[:len(categoriesPrompt)-1]
