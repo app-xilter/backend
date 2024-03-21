@@ -16,7 +16,7 @@ func ValidateStruct(s interface{}) error {
 }
 
 func ValidateUrl(s string) error {
-	pattern := `/[^/]+/status/\d+$`
+	pattern := `.*\/status\/.*`
 
 	matched, err := regexp.MatchString(pattern, s)
 	if err != nil {
