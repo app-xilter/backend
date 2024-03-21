@@ -2,7 +2,6 @@ package main
 
 import (
 	"backend/internal/durable"
-	"backend/internal/model"
 	"backend/internal/server"
 	"github.com/joho/godotenv"
 	"log"
@@ -19,7 +18,7 @@ func init() {
 		log.Fatal("Error loading .env file")
 	}
 
-	if err := durable.ConnectDB(os.Getenv("DB_DSN")); err != nil {
+	/*if err := durable.ConnectDB(os.Getenv("DB_DSN")); err != nil {
 		log.Fatal("Error connecting to database")
 	}
 
@@ -28,7 +27,7 @@ func init() {
 		&model.Tags{},
 		&model.Tweets{}); err != nil {
 		log.Fatal(err)
-	}
+	}*/
 
 }
 
