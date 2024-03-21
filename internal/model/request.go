@@ -6,7 +6,8 @@ type Tweet struct {
 }
 
 type Tag struct {
-	Id int `json:"id" validate:"required"`
+	Id   int    `json:"id" validate:"required"`
+	Text string `json:"text" validate:"required"`
 }
 
 type Request struct {
