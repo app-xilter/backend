@@ -30,6 +30,27 @@ func init() {
 		log.Fatal(err)
 	}
 
+	// init tags
+	var count int64
+	durable.Connection().Model(&model.Tags{}).Count(&count)
+	if count == 0 {
+		tags := []model.Tags{
+			{Name: "football"},
+			{Name: "basketball"},
+			{Name: "sport"},
+			{Name: "politics"},
+			{Name: "news"},
+			{Name: "economy"},
+			{Name: "crypto"},
+			{Name: "technology"},
+			{Name: "music"},
+		}
+
+		if err := durable.Connection().Create(&tags).Error; err != nil {
+			log.Fatal(err)
+		}
+	}
+
 }
 
 func main() {
