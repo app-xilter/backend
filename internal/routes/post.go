@@ -21,6 +21,7 @@ func Post(mux *http.ServeMux) {
 			}
 		}()
 
+		// validate json
 		var req model.Request
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
@@ -34,20 +35,22 @@ func Post(mux *http.ServeMux) {
 			return
 		}
 
+		// validate tweets uri
 		validatedTweets := durable.ValidateTweets(req.Tweets)
 		if validatedTweets == nil {
 			http.Error(w, "not valid tweets", http.StatusBadRequest)
 			return
 		}
 
+		// create prompts
 		tweetsPrompt := durable.CreateTweetsPrompt(validatedTweets)
-
 		categoriesPrompt, err := durable.CreateCategoriesPrompt(req.Tags)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
+		// send openai request
 		apiResponse, err := durable.OpenAIRequest(model.OpenAIRequest{
 			Prompt:   fmt.Sprintf("%s %s", os.Getenv("OPENAI_PROMPT"), categoriesPrompt),
 			Text:     tweetsPrompt,
@@ -60,6 +63,7 @@ func Post(mux *http.ServeMux) {
 			return
 		}
 
+		// parse openai response
 		var contentData map[string]interface{}
 		err = json.Unmarshal([]byte(apiResponse.Choices[0].Message.Content), &contentData)
 		if err != nil {
@@ -67,7 +71,10 @@ func Post(mux *http.ServeMux) {
 			return
 		}
 
+		// create response
 		var responseModel model.Response
+		responseModel.Results = make([]model.Result, 0)
+
 		for key, value := range contentData {
 			value = int(value.(float64))
 			if value.(int) == 0 {
@@ -92,6 +99,7 @@ func Post(mux *http.ServeMux) {
 			return
 		}
 
+		// write response
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
