@@ -42,11 +42,52 @@ func Post(mux *http.ServeMux) {
 			return
 		}
 
+		// create response
+		var responseModel model.Response
+		responseModel.Results = make([]model.Result, 0)
+
+		// check already exist database
+		for _, tweet := range validatedTweets {
+			var tweetModel model.Tweets
+			result := durable.Connection().Where(model.Tweets{Link: tweet.Link}).First(&tweetModel)
+			if result.Error != nil {
+				log.Printf("Error handling tweet: %v", result.Error)
+				continue
+			}
+
+			if tweetModel.Link == tweet.Link {
+				responseModel.Results = append(responseModel.Results, model.Result{
+					Link: tweetModel.Link,
+					Tag:  tweetModel.TagId,
+				})
+
+				// remove from validatedTweets
+				for i, v := range validatedTweets {
+					if v.Link == tweetModel.Link {
+						validatedTweets = append(validatedTweets[:i], validatedTweets[i+1:]...)
+						break
+					}
+				}
+			}
+		}
+
 		// create prompts
 		tweetsPrompt := durable.CreateTweetsPrompt(validatedTweets)
 		categoriesPrompt, err := durable.CreateCategoriesPrompt(req.Tags)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if len(tweetsPrompt) == 0 || len(categoriesPrompt) == 0 {
+			// return existing data
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+
+			res, err := json.Marshal(responseModel)
+			if _, err = w.Write(res); err != nil {
+				log.Printf("Error writing response: %v", err)
+			}
 			return
 		}
 
@@ -56,7 +97,7 @@ func Post(mux *http.ServeMux) {
 			Text:     tweetsPrompt,
 			MaxToken: 1000,
 			APIKey:   os.Getenv("OPENAI_API_KEY"),
-			Timeout:  3 * time.Second,
+			Timeout:  5 * time.Second,
 		})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -67,13 +108,10 @@ func Post(mux *http.ServeMux) {
 		var contentData map[string]interface{}
 		err = json.Unmarshal([]byte(apiResponse.Choices[0].Message.Content), &contentData)
 		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			log.Printf("Error parsing JSON: %v", err)
 			return
 		}
-
-		// create response
-		var responseModel model.Response
-		responseModel.Results = make([]model.Result, 0)
 
 		for key, value := range contentData {
 			value = int(value.(float64))
@@ -84,6 +122,18 @@ func Post(mux *http.ServeMux) {
 			index, err := strconv.Atoi(key)
 			if err != nil {
 				log.Printf("Error converting key to integer: %v", err)
+				continue
+			}
+
+			// add to database
+			createTweet := model.Tweets{
+				Link:  validatedTweets[index-1].Link,
+				TagId: value.(int),
+			}
+
+			result := durable.Connection().Where(model.Tweets{Link: validatedTweets[index-1].Link}).FirstOrCreate(&createTweet)
+			if result.Error != nil {
+				log.Printf("Error handling tweet: %v", result.Error)
 				continue
 			}
 
@@ -106,45 +156,5 @@ func Post(mux *http.ServeMux) {
 		if _, err = w.Write(res); err != nil {
 			log.Printf("Error writing response: %v", err)
 		}
-
-		/*var responseModel model.Response
-		for _, tweet := range req.Tweets {
-			err := durable.ValidateUrl(tweet.Link)
-			if err != nil {
-				continue
-			}
-
-			createTweet := model.Tweets{
-				Link:      tweet.Link,
-				TagId:     1,
-				CreatedAt: time.Now(),
-			}
-
-			result := durable.Connection().Where(model.Tweets{Link: tweet.Link}).FirstOrCreate(&createTweet)
-
-			if result.Error != nil {
-				log.Printf("Error handling tweet: %v", result.Error)
-				continue
-			}
-
-			responseModel.Results = append(responseModel.Results, model.Result{
-				Link:    createTweet.Link,
-				Tag:     createTweet.TagId,
-				TagName: "football",
-			})
-		}
-
-		res, err := json.Marshal(responseModel)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-
-		if _, err = w.Write(res); err != nil {
-			log.Printf("Error writing response: %v", err)
-		}*/
 	})
 }
