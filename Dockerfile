@@ -12,6 +12,7 @@ WORKDIR /app
 
 COPY --from=builder --chown=nonroot:nonroot /app/worker-service .
 COPY --from=builder --chown=nonroot:nonroot /app/.env .
+COPY --from=builder --chown=nonroot:nonroot /app/assets/privacy-policy.html .
 
 EXPOSE 8080
 
