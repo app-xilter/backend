@@ -8,7 +8,7 @@ import (
 
 func PrivacyPolicy(mux *http.ServeMux) {
 	mux.HandleFunc("GET /privacy-policy", func(w http.ResponseWriter, r *http.Request) {
-		file, err := os.Open("assets/privacy-policy.html")
+		file, err := os.Open("./assets/privacy-policy.html")
 		if err != nil {
 			http.Error(w, "Error reading file", http.StatusInternalServerError)
 			return
