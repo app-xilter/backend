@@ -8,8 +8,10 @@ type Tags struct {
 }
 
 type Tweets struct {
-	Id        int       `gorm:"primaryKey"`
-	Link      string    `gorm:"unique index"`
-	TagId     int       `gorm:"foreignKey:TagsId"`
+	Id        int    `gorm:"primaryKey"`
+	Link      string `gorm:"unique index"`
+	TagId     int    `gorm:"foreignKey:TagsId"`
+	Content   string
+	IPAddress string
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 }

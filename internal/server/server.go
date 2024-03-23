@@ -11,6 +11,7 @@ func SetupRoutes(mux *http.ServeMux) {
 	routes.Post(mux)
 	routes.Get(mux)
 	routes.Health(mux)
+	routes.PrivacyPolicy(mux)
 }
 
 func SetupMiddleware(handler http.Handler) http.Handler {

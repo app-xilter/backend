@@ -134,8 +134,10 @@ func Post(mux *http.ServeMux) {
 
 			// add to database
 			createTweet := model.Tweets{
-				Link:  validatedTweets[index-1].Link,
-				TagId: value.(int),
+				Link:      validatedTweets[index-1].Link,
+				TagId:     value.(int),
+				Content:   validatedTweets[index-1].Text,
+				IPAddress: r.Header.Get("x-forwarded-for"),
 			}
 
 			result := durable.Connection().Where(model.Tweets{Link: validatedTweets[index-1].Link}).FirstOrCreate(&createTweet)
