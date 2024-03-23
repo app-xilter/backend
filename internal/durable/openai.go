@@ -99,7 +99,7 @@ func CreateTweetsPrompt(t []model.Tweet) string {
 	return tweetsPrompt
 }
 
-func CreateCategoriesPrompt(c []model.Tag) (string, error) {
+func CreateCategoriesPrompt(c []model.Tag) string {
 	var categoriesPrompt = "categories:"
 	var length int
 
@@ -110,10 +110,5 @@ func CreateCategoriesPrompt(c []model.Tag) (string, error) {
 
 	categoriesPrompt = categoriesPrompt[:len(categoriesPrompt)-1]
 
-	if length == 0 {
-		return "", fmt.Errorf("no valid categories")
-
-	}
-
-	return categoriesPrompt, nil
+	return categoriesPrompt
 }

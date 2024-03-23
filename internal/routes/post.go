@@ -38,7 +38,7 @@ func Post(mux *http.ServeMux) {
 		// validate tweets uri
 		validatedTweets := durable.ValidateTweets(req.Tweets)
 		if validatedTweets == nil {
-			http.Error(w, "not valid tweets", http.StatusBadRequest)
+			http.Error(w, "No valid tweets", http.StatusBadRequest)
 			return
 		}
 
@@ -55,7 +55,7 @@ func Post(mux *http.ServeMux) {
 				continue
 			}
 
-			if tweetModel.Link == tweet.Link {
+			if result.RowsAffected > 0 {
 				responseModel.Results = append(responseModel.Results, model.Result{
 					Link: tweetModel.Link,
 					Tag:  tweetModel.TagId,
@@ -71,16 +71,8 @@ func Post(mux *http.ServeMux) {
 			}
 		}
 
-		// create prompts
-		tweetsPrompt := durable.CreateTweetsPrompt(validatedTweets)
-		categoriesPrompt, err := durable.CreateCategoriesPrompt(req.Tags)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		if len(tweetsPrompt) == 0 || len(categoriesPrompt) == 0 {
-			// return existing data
+		// return existing data
+		if len(validatedTweets) == 0 {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 
@@ -91,8 +83,12 @@ func Post(mux *http.ServeMux) {
 			return
 		}
 
+		// create prompts
+		tweetsPrompt := durable.CreateTweetsPrompt(validatedTweets)
+		categoriesPrompt := durable.CreateCategoriesPrompt(req.Tags)
+
 		// send openai request
-		apiResponse, err := durable.OpenAIRequest(model.OpenAIRequest{
+		apiResponse, _ := durable.OpenAIRequest(model.OpenAIRequest{
 			Prompt:   fmt.Sprintf("%s %s", os.Getenv("OPENAI_PROMPT"), categoriesPrompt),
 			Text:     tweetsPrompt,
 			MaxToken: 1000,
@@ -100,7 +96,13 @@ func Post(mux *http.ServeMux) {
 			Timeout:  5 * time.Second,
 		})
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusPartialContent)
+
+			res, err := json.Marshal(responseModel)
+			if _, err = w.Write(res); err != nil {
+				log.Printf("Error writing response: %v", err)
+			}
 			return
 		}
 
@@ -108,8 +110,13 @@ func Post(mux *http.ServeMux) {
 		var contentData map[string]interface{}
 		err = json.Unmarshal([]byte(apiResponse.Choices[0].Message.Content), &contentData)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			log.Printf("Error parsing JSON: %v", err)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusPartialContent)
+
+			res, err := json.Marshal(responseModel)
+			if _, err = w.Write(res); err != nil {
+				log.Printf("Error writing response: %v", err)
+			}
 			return
 		}
 
@@ -152,7 +159,6 @@ func Post(mux *http.ServeMux) {
 		// write response
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-
 		if _, err = w.Write(res); err != nil {
 			log.Printf("Error writing response: %v", err)
 		}
