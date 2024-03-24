@@ -11,7 +11,7 @@ import (
 func Get(mux *http.ServeMux) {
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		tagsList := model.SystemTagResponse{}
-		if err := durable.Connection().Table("tags").Find(&tagsList.Tags).Error; err != nil {
+		if err := durable.Connection().Table("tags").Find(&tagsList.Tags).Order("id ASC").Error; err != nil {
 			http.Error(w, "Database error: getting tags", http.StatusInternalServerError)
 			log.Println(err)
 			return
