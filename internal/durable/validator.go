@@ -1,6 +1,7 @@
 package durable
 
 import (
+	"backend/internal/model"
 	"errors"
 	"github.com/go-playground/validator/v10"
 	"regexp"
@@ -28,4 +29,14 @@ func ValidateUrl(s string) error {
 	}
 
 	return nil
+}
+
+func ContainsTag(tags []model.Tag, tag int) bool {
+	for _, t := range tags {
+		if t.Id == tag {
+			return true
+		}
+	}
+
+	return false
 }

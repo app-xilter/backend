@@ -56,10 +56,12 @@ func Post(mux *http.ServeMux) {
 			}
 
 			if result.RowsAffected > 0 {
-				responseModel.Results = append(responseModel.Results, model.Result{
-					Link: tweetModel.Link,
-					Tag:  tweetModel.TagId,
-				})
+				if durable.ContainsTag(req.Tags, tweetModel.TagId) {
+					responseModel.Results = append(responseModel.Results, model.Result{
+						Link: tweetModel.Link,
+						Tag:  tweetModel.TagId,
+					})
+				}
 
 				// remove from validatedTweets
 				for i, v := range validatedTweets {
