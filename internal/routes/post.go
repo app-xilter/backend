@@ -45,33 +45,25 @@ func Post(mux *http.ServeMux) {
 		// create response
 		var responseModel model.Response
 		responseModel.Results = make([]model.Result, 0)
+		var newValidatedTweets []model.Tweet
 
 		// check already exist database
 		for _, tweet := range validatedTweets {
 			var tweetModel model.Tweets
 			result := durable.Connection().Where(model.Tweets{Link: tweet.Link}).First(&tweetModel)
-			if result.Error != nil {
-				log.Printf("Error handling tweet: %v", result.Error)
-				continue
-			}
 
-			if result.RowsAffected > 0 {
+			if result.Error == nil {
 				if durable.ContainsTag(req.Tags, tweetModel.TagId) {
 					responseModel.Results = append(responseModel.Results, model.Result{
 						Link: tweetModel.Link,
 						Tag:  tweetModel.TagId,
 					})
 				}
-
-				// remove from validatedTweets
-				for i, v := range validatedTweets {
-					if v.Link == tweetModel.Link {
-						validatedTweets = append(validatedTweets[:i], validatedTweets[i+1:]...)
-						break
-					}
-				}
+			} else {
+				newValidatedTweets = append(newValidatedTweets, tweet)
 			}
 		}
+		validatedTweets = newValidatedTweets
 
 		// return existing data
 		if len(validatedTweets) == 0 {
@@ -97,6 +89,7 @@ func Post(mux *http.ServeMux) {
 			APIKey:   os.Getenv("OPENAI_API_KEY"),
 			Timeout:  5 * time.Second,
 		})
+
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusPartialContent)
