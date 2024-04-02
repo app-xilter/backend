@@ -1,3 +1,11 @@
+**NOTICE**
+-
+**We could not find enough coffee and cookie support to continue this project, so it was archived.**
+
+If you are interested in working on the project, even when archived you can still create a fork of it.
+
+---
+
 # XilterAI
 XilterAI is a service developed with golang net/http for content filtering for Twitter/X.
 
