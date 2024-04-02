@@ -14,7 +14,7 @@ func ConnectDB(c string) error {
 	db, err = gorm.Open(postgres.New(postgres.Config{
 		DSN:                  c,
 		PreferSimpleProtocol: true,
-		DriverName:           "cloudsqlpostgres",
+		//DriverName:           "cloudsqlpostgres",
 	}), &gorm.Config{SkipDefaultTransaction: false})
 
 	if err != nil {
